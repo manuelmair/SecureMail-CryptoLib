@@ -1,19 +1,19 @@
 package at.securemail.crypto;
 
-import org.spongycastle.crypto.*;
-import org.spongycastle.crypto.encodings.PKCS1Encoding;
-import org.spongycastle.crypto.engines.RSAEngine;
-import org.spongycastle.crypto.modes.CBCBlockCipher;
-import org.spongycastle.crypto.paddings.BlockCipherPadding;
-import org.spongycastle.crypto.paddings.PKCS7Padding;
-import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.spongycastle.crypto.params.AsymmetricKeyParameter;
-import org.spongycastle.crypto.params.KeyParameter;
-import org.spongycastle.crypto.params.ParametersWithIV;
-import org.spongycastle.crypto.params.ParametersWithRandom;
-import org.spongycastle.crypto.signers.PSSSigner;
-import org.spongycastle.crypto.util.PrivateKeyFactory;
-import org.spongycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.crypto.*;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.BlockCipherPadding;
+import org.bouncycastle.crypto.paddings.PKCS7Padding;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 
 import java.io.IOException;
 import java.security.*;
@@ -33,7 +33,7 @@ public class BasicCrypto {
         try {
             publicKey = PublicKeyFactory.createKey(recipientPublicKey);
         } catch (IOException e) {
-            throw new SecureMailException("PublicKey is not valid - IOException: " + e.getMessage());
+            throw new SecureMailException("PublicKey is not valid - IOException: " + e.getMessage(), e);
         }
 
         AsymmetricBlockCipher engine = conf.asymCipher.getEngine();
@@ -43,7 +43,7 @@ public class BasicCrypto {
         try {
             encrypted = engine.processBlock(original, 0, original.length);
         } catch (InvalidCipherTextException e) {
-            throw new SecureMailException("Asymmetric encryption failed - Invalid Cipher Text: " + e.getMessage());
+            throw new SecureMailException("Asymmetric encryption failed - Invalid Cipher Text: " + e.getMessage(), e);
         }
         return encrypted;
     }
@@ -53,7 +53,7 @@ public class BasicCrypto {
         try {
             publicKey = PublicKeyFactory.createKey(recipientPublicKey);
         } catch (IOException e) {
-            throw new SecureMailException("PublicKey is not valid - IOException: " + e.getMessage());
+            throw new SecureMailException("PublicKey is not valid - IOException: " + e.getMessage(), e);
         }
         AsymmetricBlockCipher engine = conf.asymCipher.getEngine();
 
@@ -64,7 +64,7 @@ public class BasicCrypto {
         try {
             encrypted = engine.processBlock(original, 0, original.length);
         } catch (InvalidCipherTextException e) {
-            throw new SecureMailException("Asymmetric encryption failed - Invalid Cipher Text: " + e.getMessage());
+            throw new SecureMailException("Asymmetric encryption failed - Invalid Cipher Text: " + e.getMessage(), e);
         }
         return encrypted;
     }
@@ -75,7 +75,7 @@ public class BasicCrypto {
         try {
             privateKey = PrivateKeyFactory.createKey(recipientPrivateKey);
         } catch (IOException e) {
-            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage());
+            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage(), e);
         }
         
         AsymmetricBlockCipher engine = conf.asymCipher.getEngine();
@@ -87,7 +87,7 @@ public class BasicCrypto {
         try {
             original = engine.processBlock(encrypted, 0, encrypted.length);
         } catch (InvalidCipherTextException e) {
-            throw new SecureMailException("Asymmetric decryption failed - Invalid Cipher Text: " + e.getMessage());
+            throw new SecureMailException("Asymmetric decryption failed - Invalid Cipher Text: " + e.getMessage(), e);
         }
         return original;
     }
@@ -110,7 +110,7 @@ public class BasicCrypto {
         try {
             encLen += cipher.doFinal(encrypted, encLen);
         } catch (InvalidCipherTextException e) {
-            throw new SecureMailException("Symmetric encryption failed - Invalid Cipher Text: " + e.getMessage());
+            throw new SecureMailException("Symmetric encryption failed - Invalid Cipher Text: " + e.getMessage(), e);
         }
         return encrypted;
     }
@@ -133,7 +133,7 @@ public class BasicCrypto {
         try {
             origLen += cipher.doFinal(originalPadded, origLen);
         } catch (InvalidCipherTextException e) {
-            throw new SecureMailException("Symmetric encryption failed - Invalid Cipher Text: " + e.getMessage());
+            throw new SecureMailException("Symmetric encryption failed - Invalid Cipher Text: " + e.getMessage(), e);
         }
 
         byte[] original = new byte[origLen];
@@ -161,7 +161,7 @@ public class BasicCrypto {
         try {
             publicKey = PublicKeyFactory.createKey(publicKeyBytes);
         } catch (IOException e) {
-            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage());
+            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage(), e);
         }
 
         PSSSigner signEngine;
@@ -180,7 +180,7 @@ public class BasicCrypto {
         try {
             privateKey = PrivateKeyFactory.createKey(privateKeyBytes);
         } catch (IOException e) {
-            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage());
+            throw new SecureMailException("PrivateKey is not valid - IOException: " + e.getMessage(), e);
         }
 
         PSSSigner signEngine;
@@ -193,7 +193,7 @@ public class BasicCrypto {
         try {
             return signEngine.generateSignature();
         } catch (CryptoException e) {
-            throw new SecureMailException("Signature generation failed: " + e.getMessage());
+            throw new SecureMailException("Signature generation failed: " + e.getMessage(), e);
         }
     }
 
@@ -206,21 +206,21 @@ public class BasicCrypto {
 
         switch (asymCipher) {
             case RSA_4096:
-                keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+                keyGen = KeyPairGenerator.getInstance("RSA", CryptoConfig.PROVIDER_NAME);
                 keyGen.initialize(4096, getDefaultPRNG());
                 keyPair = keyGen.genKeyPair();
                 privateKey = keyPair.getPrivate();
                 publicKey = keyPair.getPublic();
                 break;
             case RSA_2048:
-                keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+                keyGen = KeyPairGenerator.getInstance("RSA", CryptoConfig.PROVIDER_NAME);
                 keyGen.initialize(2048, getDefaultPRNG());
                 keyPair = keyGen.genKeyPair();
                 privateKey = keyPair.getPrivate();
                 publicKey = keyPair.getPublic();
                 break;
             /*case ElGamal_1024:
-                keyGen = KeyPairGenerator.getInstance("ElGamal", "BC");
+                keyGen = KeyPairGenerator.getInstance("ElGamal", CryptoConfig.PROVIDER_NAME);
                 keyGen.initialize(1024, getDefaultPRNG());
                 keyPair = keyGen.generateKeyPair();
                 privateKey = keyPair.getPrivate();

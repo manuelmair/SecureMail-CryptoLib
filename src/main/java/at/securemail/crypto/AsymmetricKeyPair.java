@@ -1,15 +1,17 @@
 package at.securemail.crypto;
 
-import javax.xml.bind.DatatypeConverter;
+import java.io.Serializable;
+import org.bouncycastle.util.encoders.Base64;
+
 import java.util.Arrays;
 
-import static at.securemail.crypto.BasicCrypto.*;
+public class AsymmetricKeyPair implements Serializable {
 
-public class AsymmetricKeyPair {
+    private static final long serialVersionUID = 1L;
 
     byte[] publicKey;
     byte[] privateKey;
-    private AsymmetricCipher cipherType;
+    private final AsymmetricCipher cipherType;
 
     private AsymmetricKeyPair(AsymmetricCipher cipherType, byte[] publicKey, byte[] privateKey) {
         this.cipherType = cipherType;
@@ -30,7 +32,7 @@ public class AsymmetricKeyPair {
     }
 
     public static AsymmetricKeyPair Create(AsymmetricCipher cipherType, String publicKeyB64, String privateKeyB64) throws SecureMailException {
-        return AsymmetricKeyPair.Create(cipherType, DatatypeConverter.parseBase64Binary(publicKeyB64), DatatypeConverter.parseBase64Binary(privateKeyB64));
+        return AsymmetricKeyPair.Create(cipherType, Base64.decode(publicKeyB64), Base64.decode(privateKeyB64));
     }
 
     public static boolean checkKeyValidity(AsymmetricKeyPair createdKeyPair) throws SecureMailException {
@@ -62,12 +64,20 @@ public class AsymmetricKeyPair {
         return cipherType;
     }
 
-    public String getPublicKey() {
-        return DatatypeConverter.printBase64Binary(publicKey);
+    public String getPublicKeyStr() {
+        return Base64.toBase64String(publicKey);
     }
 
-    public String getPrivateKey() {
-        return DatatypeConverter.printBase64Binary(privateKey);
+    public String getPrivateKeyStr() {
+        return Base64.toBase64String(privateKey);
+    }
+
+    public AsymmetricPublicKey getPublicKey() {
+        try {
+            return AsymmetricPublicKey.Create(cipherType, publicKey);
+        } catch (SecureMailException ex) {
+            return null;
+        }
     }
 
 }

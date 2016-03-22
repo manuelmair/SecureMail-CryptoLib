@@ -1,6 +1,10 @@
 package at.securemail.crypto;
 
-public class SecureCipherConfig {
+import java.io.Serializable;
+
+public class SecureCipherConfig implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public AsymmetricCipher asymCipher;
     public SymmetricCipher symCipher;
@@ -16,7 +20,7 @@ public class SecureCipherConfig {
         return new SecureCipherConfig(AsymmetricCipher.decode(asymByte), SymmetricCipher.decode(symByte), HashAlgorithm.decode(hashByte));
     }
 
-    byte[] encode() {
+    public byte[] encode() {
         return new byte[]{asymCipher.encode(), symCipher.encode(), hashAlgorithm.encode()};
     }
 

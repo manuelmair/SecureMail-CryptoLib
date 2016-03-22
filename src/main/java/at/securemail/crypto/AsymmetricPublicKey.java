@@ -1,11 +1,14 @@
 package at.securemail.crypto;
 
-import javax.xml.bind.DatatypeConverter;
+import java.io.Serializable;
+import org.bouncycastle.util.encoders.Base64;
 
-public class AsymmetricPublicKey {
+public class AsymmetricPublicKey implements Serializable {
 
-    private AsymmetricCipher cipherType;
-    private byte[] publicKey;
+    private static final long serialVersionUID = 1L;
+
+    private final AsymmetricCipher cipherType;
+    private final byte[] publicKey;
 
     private AsymmetricPublicKey(AsymmetricCipher cipherType, byte[] publicKey) {
         this.cipherType = cipherType;
@@ -20,7 +23,7 @@ public class AsymmetricPublicKey {
     }
 
     public static AsymmetricPublicKey Create(AsymmetricCipher cipherType, String publicKeyB64) throws SecureMailException {
-        return AsymmetricPublicKey.Create(cipherType, DatatypeConverter.parseBase64Binary(publicKeyB64));
+        return AsymmetricPublicKey.Create(cipherType, Base64.decode(publicKeyB64));
     }
 
     public static boolean checkKeyValidity(AsymmetricPublicKey createdKeyPair) throws SecureMailException {
@@ -44,7 +47,7 @@ public class AsymmetricPublicKey {
     }
 
     public String getPublicKey() {
-        return DatatypeConverter.printBase64Binary(publicKey);
+        return Base64.toBase64String(publicKey);
     }
 
 }

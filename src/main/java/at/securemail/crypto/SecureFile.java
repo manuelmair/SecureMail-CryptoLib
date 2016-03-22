@@ -12,7 +12,7 @@ import java.security.spec.KeySpec;
 import javax.crypto.BadPaddingException;
 
 public class SecureFile {
-
+    
     public static final int SALT_BIT = 64;
     public static final int BLOCK_SIZE = 128;
 
@@ -66,12 +66,12 @@ public class SecureFile {
         byte[] iv = new byte[BLOCK_SIZE / 8];
         encIS.read(iv);
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1", "BC");
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1", CryptoConfig.PROVIDER_NAME);
         KeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
         SecretKey tmp = factory.generateSecret(keySpec);
         SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
 
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", CryptoConfig.PROVIDER_NAME);
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv), BasicCrypto.get().getDefaultPRNG());
         byte[] in = new byte[BLOCK_SIZE / 8];
         int read;

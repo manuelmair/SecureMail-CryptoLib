@@ -49,3 +49,6 @@ Temporary Items
 /build
 /dist
 /nbproject
+/mysrc
+
+cryptolib.iml

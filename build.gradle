@@ -1,5 +1,36 @@
 apply plugin: 'java'
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ['mysrc/main/java']
+        }
+    }
+}
+
+build {
+
+    println("build")
+
+
+    configure {
+        println("configure")
+
+
+        copy {
+            from('src') {
+                include '**/*.java'
+                filter {
+                    String line ->
+                        line.replace("org.bouncycastle", 'org.spongycastle')
+                }
+            }
+            into 'mysrc'
+        }
+    }
+
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 

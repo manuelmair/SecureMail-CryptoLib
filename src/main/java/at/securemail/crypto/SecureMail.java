@@ -1,6 +1,5 @@
 package at.securemail.crypto;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -9,18 +8,18 @@ public class SecureMail {
 
     public static final int SECMAIL_VERSION = 1;
     public static final Charset CONTENT_CHARSET = Charset.forName("UTF-8");
-    protected static final String SECMAIL_IDENTIFER = "?SECMAIL?";
+    static final String SECMAIL_IDENTIFER = "?SECMAIL?";
 
     public AttachedFiles attachedFiles;
-    protected AsymmetricKeyPair recipientKeyPair;
+    AsymmetricKeyPair recipientKeyPair;
 
     // recipient
-    protected byte[] senderPubKey;
-    protected byte[] recipientPubKey;
-    protected AsymmetricKeyPair senderKeyPair;
+    byte[] senderPubKey;
+    byte[] recipientPubKey;
+    AsymmetricKeyPair senderKeyPair;
 
     // sender
-    protected SecureCipherConfig conf;
+    SecureCipherConfig conf;
     private boolean recipient = true; // true = i received / false = i sent
     private boolean locked = false; // true: signature has been created => file add not possible
     private byte[] encContent; // symmetrically encrypted content
@@ -34,11 +33,11 @@ public class SecureMail {
     private SecureMail() {
     }
 
-    public SecureMail(SecureCipherConfig conf, String content, String recipientPubKeyB64, AsymmetricKeyPair senderKeyPair) throws SecureMailException, IOException {
-        this(conf, content.getBytes(CONTENT_CHARSET), DatatypeConverter.parseBase64Binary(recipientPubKeyB64), senderKeyPair);
+    public SecureMail(SecureCipherConfig conf, String content, String recipientPubKeyB64, AsymmetricKeyPair senderKeyPair) throws SecureMailException {
+        this(conf, content.getBytes(CONTENT_CHARSET), B64.decode(recipientPubKeyB64), senderKeyPair);
     }
 
-    public SecureMail(SecureCipherConfig conf, byte[] content, byte[] recipientPubKeyB64, AsymmetricKeyPair senderKeyPair) throws SecureMailException, IOException {
+    public SecureMail(SecureCipherConfig conf, byte[] content, byte[] recipientPubKeyB64, AsymmetricKeyPair senderKeyPair) throws SecureMailException {
         this.conf = conf;
         this.recipientPubKey = recipientPubKeyB64;
         this.senderKeyPair = senderKeyPair;
@@ -56,7 +55,7 @@ public class SecureMail {
     }
 
     public static SecureMail parseEncrypted(String encryptedContentB64) throws SecureMailException, IOException {
-        return parseEncrypted(DatatypeConverter.parseBase64Binary(encryptedContentB64));
+        return parseEncrypted(B64.decode(encryptedContentB64));
     }
 
     public static SecureMail parseEncrypted(byte[] encryptedContent) throws SecureMailException, IOException {
@@ -79,7 +78,7 @@ public class SecureMail {
     }
 
     public String encryptMessage() throws SecureMailException, IOException {
-        return DatatypeConverter.printBase64Binary(encrypt());
+        return B64.toBase64String(encrypt());
     }
 
     public byte[] encrypt() throws SecureMailException, IOException {
@@ -110,7 +109,7 @@ public class SecureMail {
     }
 
     public String decryptMessage(String senderPubKeyB64, AsymmetricKeyPair recipientKeyPair) throws SecureMailException, IOException {
-        return new String(decrypt(DatatypeConverter.parseBase64Binary(senderPubKeyB64), recipientKeyPair), CONTENT_CHARSET);
+        return new String(decrypt(B64.decode(senderPubKeyB64), recipientKeyPair), CONTENT_CHARSET);
     }
 
     public byte[] decrypt(byte[] senderPubKeyB64, AsymmetricKeyPair recipientKeyPair) throws SecureMailException, IOException {

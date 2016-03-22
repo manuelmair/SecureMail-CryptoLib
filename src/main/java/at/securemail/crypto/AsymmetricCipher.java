@@ -1,16 +1,20 @@
 package at.securemail.crypto;
 
-import org.spongycastle.crypto.AsymmetricBlockCipher;
-import org.spongycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.engines.RSAEngine;
 
-public enum AsymmetricCipher {
+import java.io.Serializable;
 
+public enum AsymmetricCipher implements Serializable{
+    
     RSA_4096(new RSAEngine(), 4096, 501),
     RSA_2048(new RSAEngine(), 2048, 245);
 
+    private static final long serialVersionUID = 1L;
+    
     private AsymmetricBlockCipher cipher;
-    protected int blockSizeBit; // this is equal to key size & block size
-    protected int inputBlockSize;
+    int blockSizeBit; // this is equal to key size & block size
+    int inputBlockSize;
 
     AsymmetricCipher(AsymmetricBlockCipher cipher, int blockSizeBit, int inputBlockSize) {
         this.cipher = cipher;
@@ -18,7 +22,7 @@ public enum AsymmetricCipher {
         this.inputBlockSize = inputBlockSize;
     }
 
-    protected static AsymmetricCipher decode(byte suiteIndex) throws SecureMailException {
+    static AsymmetricCipher decode(byte suiteIndex) throws SecureMailException {
         try {
             return values()[suiteIndex + 128];
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -26,19 +30,26 @@ public enum AsymmetricCipher {
         }
     }
 
-    protected byte encode() {
+    byte encode() {
         for (byte b = -128; b < values().length && b < 256; b++)
             if (values()[b + 128] == this)
                 return b;
         return 0; // in a sane environment this is impossible
     }
 
-    protected AsymmetricBlockCipher getEngine(){
+    AsymmetricBlockCipher getEngine(){
         try {
             return cipher.getClass().newInstance();
         } catch (InstantiationException | IllegalAccessException ex) {
             return null;
         }
+    }
+
+    public int getIndex() {
+        for(int i = 0; i < values().length; i++)
+            if(values()[i].equals(this))
+                return i;
+        return -1;
     }
 
 }

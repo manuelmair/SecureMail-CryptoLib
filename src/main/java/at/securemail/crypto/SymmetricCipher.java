@@ -1,10 +1,10 @@
 package at.securemail.crypto;
 
-import org.spongycastle.crypto.BlockCipher;
-import org.spongycastle.crypto.engines.AESEngine;
-import org.spongycastle.crypto.engines.BlowfishEngine;
-import org.spongycastle.crypto.engines.DESedeEngine;
-import org.spongycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.BlowfishEngine;
+import org.bouncycastle.crypto.engines.DESedeEngine;
+import org.bouncycastle.crypto.engines.TwofishEngine;
 
 public enum SymmetricCipher {
 
@@ -15,9 +15,9 @@ public enum SymmetricCipher {
     //THREEFISH(new ThreefishEngine(512), 512, 512),
     TRIPLE_DES(new DESedeEngine(), 128, 64);
 
-    protected BlockCipher cipher;
-    protected int keyBit;
-    protected int blockBit;
+    BlockCipher cipher;
+    int keyBit;
+    int blockBit;
 
     SymmetricCipher(BlockCipher cipher, int keyBit, int symBlockBit) {
         this.cipher = cipher;
@@ -33,15 +33,14 @@ public enum SymmetricCipher {
         }
     }
 
-    protected byte encode() {
+    byte encode() {
         for (byte b = -128; b < values().length && b < 256; b++)
             if (values()[b + 128] == this)
                 return b;
         return 0; // shouldnt happen ever
     }
 
-
-    protected BlockCipher getEngine(){
+    BlockCipher getEngine() {
         try {
             return cipher.getClass().newInstance();
         } catch (InstantiationException | IllegalAccessException ex) {
@@ -49,5 +48,11 @@ public enum SymmetricCipher {
         }
     }
 
+    public int getIndex() {
+        for (int i = 0; i < values().length; i++)
+            if (values()[i].equals(this))
+                return i;
+        return -1;
+    }
 
 }
