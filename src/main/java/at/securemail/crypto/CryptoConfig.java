@@ -2,6 +2,6 @@ package at.securemail.crypto;
 
 public class CryptoConfig {
     
-    public static String PROVIDER_NAME = "SC";
+    public static String PROVIDER_NAME = "BC";
     
 }
